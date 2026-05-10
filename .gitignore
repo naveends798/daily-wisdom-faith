@@ -1,0 +1,43 @@
+# Secrets — NEVER commit these
+.env
+.env.local
+*.pem
+client_secret*.json
+oauth_token.json
+service_account*.json
+credentials.json
+token.pickle
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+.tox/
+
+# Build artifacts (generated locally during testing)
+build/
+dist/
+*.egg
+out/
+work/
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/

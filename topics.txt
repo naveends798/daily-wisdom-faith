@@ -1,0 +1,113 @@
+# Suggested filename seeds. Pick one, name your Suno download to match, drop
+# it (with a video clip and a thumbnail .jpg/.png) into a date folder. The
+# system handles the rest.
+# Naming rule: kebab-case, descriptive, optionally include a scripture ref.
+# Example: trust-in-the-lord-psalm-23.mp3
+
+# --- Comfort & Peace ---
+peace-be-still-mark-4.mp3
+peace-i-leave-with-you-john-14.mp3
+fear-not-isaiah-41.mp3
+be-still-and-know-psalm-46.mp3
+cast-your-cares-1-peter-5.mp3
+the-lord-is-my-light-psalm-27.mp3
+hope-in-the-morning.mp3
+when-anxious-thoughts-arise.mp3
+god-is-our-refuge-psalm-46.mp3
+my-soul-finds-rest-psalm-62.mp3
+
+# --- Trust & Faith ---
+trust-in-the-lord-proverbs-3.mp3
+faith-of-a-mustard-seed.mp3
+walk-by-faith-2-corinthians-5.mp3
+god-will-make-a-way.mp3
+he-leads-me-beside-still-waters.mp3
+the-lord-is-my-shepherd-psalm-23.mp3
+even-when-i-walk-through-the-valley.mp3
+his-eye-is-on-the-sparrow.mp3
+god-of-all-comfort-2-corinthians-1.mp3
+i-will-not-be-shaken.mp3
+
+# --- Worship & Praise ---
+amazing-grace-meditation.mp3
+how-great-thou-art.mp3
+holy-holy-holy.mp3
+great-is-thy-faithfulness.mp3
+worthy-of-all-praise.mp3
+i-will-bless-the-lord-psalm-34.mp3
+sing-a-new-song-psalm-96.mp3
+praise-from-sunrise-to-sunset.mp3
+the-heavens-declare-psalm-19.mp3
+glory-to-god-in-the-highest.mp3
+
+# --- Scripture & Word ---
+psalm-23-the-shepherd.mp3
+psalm-91-the-shelter.mp3
+psalm-139-known-by-god.mp3
+isaiah-40-renewed-strength.mp3
+romans-8-no-separation.mp3
+philippians-4-rejoice-always.mp3
+ecclesiastes-3-a-time-for-everything.mp3
+matthew-11-come-to-me.mp3
+john-3-16-for-god-so-loved.mp3
+beatitudes-matthew-5.mp3
+
+# --- Prayer & Devotion ---
+the-lords-prayer-instrumental.mp3
+morning-prayer-mercies-new.mp3
+evening-prayer-watch-over.mp3
+prayer-of-st-francis.mp3
+prayer-for-strength.mp3
+prayer-for-healing.mp3
+prayer-for-the-weary.mp3
+prayer-of-thanksgiving.mp3
+prayer-of-surrender.mp3
+prayer-for-guidance.mp3
+
+# --- Hope & Healing ---
+healing-balm-of-gilead.mp3
+he-restores-my-soul.mp3
+beauty-from-ashes-isaiah-61.mp3
+streams-in-the-desert.mp3
+joy-comes-in-the-morning-psalm-30.mp3
+new-mercies-every-morning.mp3
+the-great-physician.mp3
+mourning-into-dancing.mp3
+weeping-may-tarry-for-a-night.mp3
+he-makes-all-things-new.mp3
+
+# --- Love & Grace ---
+god-is-love-1-john-4.mp3
+unconditional-love-of-the-father.mp3
+amazing-grace-how-sweet.mp3
+the-prodigal-comes-home.mp3
+his-love-endures-forever-psalm-136.mp3
+nothing-can-separate-us.mp3
+greater-love-has-no-one.mp3
+mercy-tender-and-deep.mp3
+the-good-shepherd-john-10.mp3
+beloved-of-the-father.mp3
+
+# --- Strength & Courage ---
+be-strong-and-courageous-joshua-1.mp3
+the-joy-of-the-lord-is-my-strength.mp3
+i-can-do-all-things-philippians-4.mp3
+mountains-shall-be-moved.mp3
+god-is-my-fortress-psalm-18.mp3
+they-that-wait-shall-renew.mp3
+walking-on-water-matthew-14.mp3
+through-the-fire-isaiah-43.mp3
+warrior-of-the-lord.mp3
+overcomers-revelation-21.mp3
+
+# --- Christmas / Easter / Seasons (use as appropriate) ---
+o-come-emmanuel.mp3
+silent-night-holy-night.mp3
+joy-to-the-world.mp3
+the-cross-of-calvary.mp3
+he-is-risen.mp3
+hosanna-in-the-highest.mp3
+hallelujah-our-king.mp3
+the-empty-tomb.mp3
+walking-with-jesus.mp3
+the-light-of-the-world.mp3
