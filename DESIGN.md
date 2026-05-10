@@ -20,7 +20,7 @@ without human intervention.
 │ Daily at 03:30 UTC (09:00 IST)   │
 │                                  │
 │ 1. Pull today's Drive folder     │
-│ 2. Generate metadata (DeepSeek)  │   ← title, desc, tags from filename
+│ 2. Generate metadata (OpenAI)    │   ← title, desc, tags from filename
 │ 3. Resize/crop thumbnail (Pillow)│   ← user image → 1280×720 / <2 MB
 │ 4. Stitch video (FFmpeg)         │   ← loop bg to audio length, fades
 │ 5. Upload to YouTube + schedule  │
@@ -61,7 +61,8 @@ files in kebab-case with optional scripture reference, e.g.
 
 ## Metadata generation
 
-A single structured prompt to DeepSeek (via Ollama Cloud) returns:
+A single structured prompt to OpenAI's `gpt-4o-mini` (with
+`response_format=json_object`) returns:
 
 ```json
 {
@@ -134,9 +135,9 @@ Together.ai as a dependency.
 | GitHub Actions       | Free (well within 2000 min/mo) |
 | Google Drive         | Free (15 GB included)     |
 | YouTube Data API     | Free (default quota of 10k units/day; one upload uses ~1600) |
-| Ollama Cloud         | Per existing subscription |
+| OpenAI gpt-4o-mini   | ~$0.02/month at one video/day |
 | Gmail SMTP           | Free                      |
-| **Total**            | **$0/month** (excluding Ollama subscription) |
+| **Total**            | **~$0.02/month**          |
 
 ## Out of scope (deliberately)
 

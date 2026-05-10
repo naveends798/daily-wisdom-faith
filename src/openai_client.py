@@ -1,4 +1,6 @@
-"""Generate YouTube metadata from an audio filename via Ollama Cloud (DeepSeek)."""
+"""Generate YouTube metadata from an audio filename via the OpenAI Chat
+Completions API. Uses gpt-4o-mini by default — fast and cheap, and excellent
+at producing valid structured JSON via response_format=json_object."""
 from __future__ import annotations
 
 import json
@@ -79,9 +81,12 @@ class Metadata:
         }
 
 
+class _ClientError(Exception):
+    """4xx error from OpenAI — don't retry, fail fast with the response body."""
+
+
 def _extract_json(text: str) -> dict:
-    """Pull the first JSON object out of a model response, even if surrounded
-    by stray text or fenced in markdown."""
+    """Pull the first JSON object out of a model response."""
     fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fence:
         return json.loads(fence.group(1))
@@ -89,10 +94,6 @@ def _extract_json(text: str) -> dict:
     if brace:
         return json.loads(brace.group(0))
     raise ValueError(f"No JSON object in model response: {text[:200]!r}")
-
-
-class _ClientError(Exception):
-    """4xx error from Ollama — don't retry, fail fast with the response body."""
 
 
 @retry(
@@ -104,16 +105,16 @@ class _ClientError(Exception):
 def generate_metadata(
     cfg: Config, *, audio_filename_stem: str, notes: Optional[str]
 ) -> Metadata:
-    """Call Ollama Cloud chat completion and parse a Metadata object."""
-    url = f"{cfg.ollama_api_base.rstrip('/')}/chat"
+    """Call OpenAI chat completion and parse a Metadata object."""
+    url = f"{cfg.openai_api_base.rstrip('/')}/chat/completions"
     headers = {
-        "Authorization": f"Bearer {cfg.ollama_api_key}",
+        "Authorization": f"Bearer {cfg.openai_api_key}",
         "Content-Type": "application/json",
     }
     payload = {
-        "model": cfg.ollama_model,
-        "stream": False,
-        "format": "json",
+        "model": cfg.openai_model,
+        "temperature": 0.7,
+        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -124,30 +125,26 @@ def generate_metadata(
                 ),
             },
         ],
-        "options": {"temperature": 0.7},
     }
-    log.info("Requesting metadata from %s (model=%s)", url, cfg.ollama_model)
+    log.info("Requesting metadata from %s (model=%s)", url, cfg.openai_model)
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=180)
+        resp = requests.post(url, json=payload, headers=headers, timeout=60)
     except requests.exceptions.Timeout as e:
-        log.warning("Ollama request timed out after 180s (will retry): %s", e)
+        log.warning("OpenAI request timed out (will retry): %s", e)
         raise
     if 400 <= resp.status_code < 500:
         snippet = resp.text[:500].replace("\n", " ")
         raise _ClientError(
-            f"Ollama returned {resp.status_code} for model {cfg.ollama_model!r}: "
-            f"{snippet}. Check OLLAMA_MODEL is correct for your account."
+            f"OpenAI returned {resp.status_code} for model {cfg.openai_model!r}: "
+            f"{snippet}. Check OPENAI_API_KEY and OPENAI_MODEL."
         )
     resp.raise_for_status()
     body = resp.json()
 
-    # Ollama chat response: {"message": {"content": "..."}}
-    content = ""
-    if isinstance(body, dict):
-        msg = body.get("message") or {}
-        content = msg.get("content", "") or body.get("response", "")
-    if not content:
-        raise ValueError(f"Empty response from Ollama: {body!r}")
+    try:
+        content = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as e:
+        raise ValueError(f"Unexpected OpenAI response shape: {body!r}") from e
 
     raw = _extract_json(content)
     return Metadata(

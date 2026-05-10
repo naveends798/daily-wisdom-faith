@@ -1,7 +1,7 @@
 """Local smoke test of metadata generation + thumbnail processing.
 
 Provide a filename stem and a path to a thumbnail image; uses your real
-Ollama key but does NOT touch Drive or YouTube. Outputs to ./out/.
+OpenAI key but does NOT touch Drive or YouTube. Outputs to ./out/.
 
     python scripts/test_pipeline.py "trust-in-the-lord-psalm-23" /path/to/image.jpg
 """
@@ -14,7 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from src import ollama_client, thumbnail  # noqa: E402
+from src import openai_client, thumbnail  # noqa: E402
 from src.config import Config  # noqa: E402
 
 
@@ -35,14 +35,14 @@ def main() -> None:
         sys.exit(2)
 
     cfg = Config.load(require_runtime=False)
-    if not cfg.ollama_api_key:
-        print("Need OLLAMA_API_KEY in env or .env", file=sys.stderr)
+    if not cfg.openai_api_key:
+        print("Need OPENAI_API_KEY in env or .env", file=sys.stderr)
         sys.exit(2)
 
     out_dir = REPO_ROOT / "out"
     out_dir.mkdir(exist_ok=True)
 
-    meta = ollama_client.generate_metadata(cfg, audio_filename_stem=stem, notes=None)
+    meta = openai_client.generate_metadata(cfg, audio_filename_stem=stem, notes=None)
     print("\n--- METADATA ---")
     print(f"Title       : {meta.title}")
     print(f"Tags        : {meta.tags}")

@@ -30,7 +30,7 @@ just drop files into Drive each day.
 - [ ] A laptop/desktop with Python 3.11+ and FFmpeg installed
       (Mac: `brew install python ffmpeg`)
 - [ ] A free GitHub account
-- [ ] An Ollama Cloud account with API key
+- [ ] An OpenAI account with API key (<https://platform.openai.com/api-keys>)
 
 ---
 
@@ -106,20 +106,19 @@ date-named subfolders, plus `default/` and `published/`.
 
 ---
 
-## Step 3 — Get an Ollama Cloud API key (2 min)
+## Step 3 — Get an OpenAI API key (2 min)
 
-1. Sign in at <https://ollama.com/cloud>
-2. Go to your **API Keys** page and create a new key
-3. Save the key
-4. Note the exact model name available to you. The repo defaults to
-   `deepseek-v4-flash` — if your account has a different DeepSeek variant
-   (V3, V3.1, etc.), note that name; you'll set it as `OLLAMA_MODEL` in
-   Step 5.
+1. Sign in at <https://platform.openai.com/>
+2. Go to <https://platform.openai.com/api-keys> and click **+ Create new secret key**
+3. Give it any name (e.g. `daily-wisdom-faith`), click **Create**, copy the key
+   that starts with `sk-...` and save it somewhere safe — OpenAI shows it only once
+4. The repo defaults to model `gpt-4o-mini` — fast and cheap (~$0.0005 per video).
+   You can change it later via the `OPENAI_MODEL` GitHub variable if you want a
+   stronger model like `gpt-4o`.
 
-> **If `deepseek-v4-flash` doesn't exist on your account**, try the model name
-> shown in your Ollama Cloud console. Any reasonably capable text model works
-> — the prompt is robust. If quality is poor you can swap models without
-> redeploying anything.
+> **Make sure your OpenAI account has at least $5 of credit** at
+> <https://platform.openai.com/settings/organization/billing/overview>. New
+> accounts sometimes start with no credit and API calls will 429.
 
 ---
 
@@ -147,13 +146,12 @@ date-named subfolders, plus `default/` and `published/`.
    | `GOOGLE_CLIENT_SECRET`   | from Step 2 bootstrap output                   |
    | `GOOGLE_REFRESH_TOKEN`   | from Step 2 bootstrap output                   |
    | `DRIVE_QUEUE_FOLDER_ID`  | from Step 2 bootstrap output                   |
-   | `OLLAMA_API_KEY`         | from Step 3                                    |
+   | `OPENAI_API_KEY`         | from Step 3                                    |
    | `SMTP_APP_PASSWORD`      | *(optional)* from Step 5 below                 |
 
-4. *(Optional but recommended)* In the same UI, switch to the **Variables** tab
-   and override defaults if you want a different model:
-   - `OLLAMA_MODEL` — e.g. `deepseek-v3.1` if you don't have v4-flash
-   - `OLLAMA_API_BASE` — only if Ollama Cloud changes their endpoint
+4. *(Optional)* In the same UI, switch to the **Variables** tab to override
+   defaults. For example, set `OPENAI_MODEL` to `gpt-4o` if you want a
+   stronger (and slightly more expensive) model.
 
 ---
 

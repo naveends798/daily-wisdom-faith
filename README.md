@@ -35,7 +35,7 @@ thumbnail words from it. See `topics.txt` for 100 ready-to-use seeds.
 ## What the system does each morning at 9 IST
 
 1. Reads today's Drive folder (audio + video + thumbnail)
-2. Generates metadata with **DeepSeek** (via Ollama Cloud) — title, description,
+2. Generates metadata with **OpenAI** (gpt-4o-mini) — title, description,
    tags, scripture reference
 3. Resizes/crops your thumbnail to YouTube's 1280×720 spec, keeps it under 2 MB
 4. Stitches video and audio with **FFmpeg** — loops the bg video to match audio
@@ -55,7 +55,7 @@ thumbnail words from it. See `topics.txt` for 100 ready-to-use seeds.
 │   ├── config.py          # env-var loader
 │   ├── google_auth.py     # shared OAuth credential factory
 │   ├── drive.py           # Drive folder maintenance + asset download
-│   ├── ollama_client.py   # DeepSeek metadata generation
+│   ├── openai_client.py   # OpenAI metadata generation (gpt-4o-mini)
 │   ├── thumbnail.py       # resize/crop user thumbnail to YouTube spec
 │   ├── video.py           # FFmpeg stitching
 │   ├── youtube.py         # YouTube Data API v3 uploader
@@ -80,9 +80,9 @@ time and then you never touch it again.
 
 ## Cost
 
-$0/month. Free tier of GitHub Actions, Google Drive, YouTube API, and Gmail
-SMTP covers everything. Ollama Cloud is whatever your existing subscription
-costs.
+~$0.02/month. GitHub Actions, Google Drive, YouTube API, and Gmail SMTP are
+free. OpenAI gpt-4o-mini for the daily metadata call costs ~$0.0005 per video
+(roughly 2 cents per month at one video per day).
 
 ## License
 

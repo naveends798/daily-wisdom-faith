@@ -124,7 +124,7 @@ def main() -> None:
     print(f"DRIVE_QUEUE_FOLDER_ID    = {queue_id}")
     print()
     print("And the rest from your accounts:")
-    print("  OLLAMA_API_KEY, TOGETHER_API_KEY, SMTP_APP_PASSWORD")
+    print("  OPENAI_API_KEY, SMTP_APP_PASSWORD (optional)")
     print()
     print("Open Drive → 'prayer-channel-queue' → drop your audio + video into")
     print("today's date folder. The cron will publish it at 9 AM IST.")

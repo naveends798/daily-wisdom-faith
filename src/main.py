@@ -3,7 +3,7 @@
 Pipeline:
   1. Find today's Drive folder (fallback to default/ if today is empty)
   2. Download audio + video + user-supplied thumbnail image (+ optional notes)
-  3. Generate title/description/tags via Ollama Cloud (DeepSeek)
+  3. Generate title/description/tags via OpenAI (gpt-4o-mini)
   4. Resize/compress the user thumbnail to YouTube's 1280x720 / 2 MB spec
   5. Stitch final 1080p MP4 with looping video and faded audio
   6. Upload to YouTube, scheduled at today 09:00 IST
@@ -21,7 +21,7 @@ from collections import deque
 from datetime import date
 
 from .config import WORK_DIR, Config
-from . import drive, notifier, ollama_client, thumbnail, video, youtube
+from . import drive, notifier, openai_client, thumbnail, video, youtube
 
 LOG_TAIL = deque(maxlen=80)
 
@@ -73,7 +73,7 @@ def run() -> int:
             audio_stem = f"daily-wisdom-{today.strftime('%Y-%m-%d')}"
 
         log.info("Generating metadata for stem=%r", audio_stem)
-        meta = ollama_client.generate_metadata(
+        meta = openai_client.generate_metadata(
             cfg, audio_filename_stem=audio_stem, notes=notes
         )
         log.info(

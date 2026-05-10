@@ -43,9 +43,9 @@ class Config:
     google_refresh_token: str
     drive_queue_folder_id: str
 
-    ollama_api_base: str
-    ollama_api_key: str
-    ollama_model: str
+    openai_api_base: str
+    openai_api_key: str
+    openai_model: str
 
     smtp_user: str
     smtp_app_password: str
@@ -65,9 +65,9 @@ class Config:
             google_client_secret=load("GOOGLE_CLIENT_SECRET"),
             google_refresh_token=load("GOOGLE_REFRESH_TOKEN"),
             drive_queue_folder_id=load("DRIVE_QUEUE_FOLDER_ID"),
-            ollama_api_base=_optional("OLLAMA_API_BASE", "https://ollama.com/api"),
-            ollama_api_key=load("OLLAMA_API_KEY"),
-            ollama_model=_optional("OLLAMA_MODEL", "deepseek-v4-flash"),
+            openai_api_base=_optional("OPENAI_API_BASE", "https://api.openai.com/v1"),
+            openai_api_key=load("OPENAI_API_KEY"),
+            openai_model=_optional("OPENAI_MODEL", "gpt-4o-mini"),
             smtp_user=_optional("SMTP_USER", "naveends798@gmail.com"),
             # Optional: leave SMTP_APP_PASSWORD unset to disable email
             # notifications. The notifier becomes a no-op; GitHub Actions

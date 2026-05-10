@@ -31,9 +31,9 @@ jobs:
       GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
       DRIVE_QUEUE_FOLDER_ID: ${{ secrets.DRIVE_QUEUE_FOLDER_ID }}
 
-      OLLAMA_API_BASE: ${{ vars.OLLAMA_API_BASE || 'https://ollama.com/api' }}
-      OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-      OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'deepseek-v4-flash' }}
+      OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.openai.com/v1' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
 
       SMTP_USER: ${{ vars.SMTP_USER || 'naveends798@gmail.com' }}
       SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
@@ -56,16 +56,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Diagnose Ollama (list available models)
-        continue-on-error: true
-        run: |
-          echo "Configured model: $OLLAMA_MODEL"
-          echo "Listing models from $OLLAMA_API_BASE/tags ..."
-          curl -sS --max-time 30 \
-            -H "Authorization: Bearer $OLLAMA_API_KEY" \
-            "$OLLAMA_API_BASE/tags" || true
-          echo ""
 
       - name: Run daily pipeline
         run: python -m src.main
