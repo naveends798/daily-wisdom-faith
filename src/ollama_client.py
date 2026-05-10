@@ -8,7 +8,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 import requests
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from .config import Config
 
@@ -94,7 +99,7 @@ class _ClientError(Exception):
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=2, min=2, max=20),
     reraise=True,
-    retry=lambda state: not isinstance(state.outcome.exception(), _ClientError),
+    retry=retry_if_not_exception_type(_ClientError),
 )
 def generate_metadata(
     cfg: Config, *, audio_filename_stem: str, notes: Optional[str]
