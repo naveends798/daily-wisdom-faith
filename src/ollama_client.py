@@ -86,10 +86,15 @@ def _extract_json(text: str) -> dict:
     raise ValueError(f"No JSON object in model response: {text[:200]!r}")
 
 
+class _ClientError(Exception):
+    """4xx error from Ollama — don't retry, fail fast with the response body."""
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=2, min=2, max=20),
     reraise=True,
+    retry=lambda state: not isinstance(state.outcome.exception(), _ClientError),
 )
 def generate_metadata(
     cfg: Config, *, audio_filename_stem: str, notes: Optional[str]
@@ -117,7 +122,17 @@ def generate_metadata(
         "options": {"temperature": 0.7},
     }
     log.info("Requesting metadata from %s (model=%s)", url, cfg.ollama_model)
-    resp = requests.post(url, json=payload, headers=headers, timeout=120)
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=60)
+    except requests.exceptions.Timeout as e:
+        log.warning("Ollama request timed out after 60s (will retry): %s", e)
+        raise
+    if 400 <= resp.status_code < 500:
+        snippet = resp.text[:500].replace("\n", " ")
+        raise _ClientError(
+            f"Ollama returned {resp.status_code} for model {cfg.ollama_model!r}: "
+            f"{snippet}. Check OLLAMA_MODEL is correct for your account."
+        )
     resp.raise_for_status()
     body = resp.json()
 

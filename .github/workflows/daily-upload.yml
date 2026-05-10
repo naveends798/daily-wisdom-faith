@@ -57,6 +57,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Diagnose Ollama (list available models)
+        continue-on-error: true
+        run: |
+          echo "Configured model: $OLLAMA_MODEL"
+          echo "Listing models from $OLLAMA_API_BASE/tags ..."
+          curl -sS --max-time 30 \
+            -H "Authorization: Bearer $OLLAMA_API_KEY" \
+            "$OLLAMA_API_BASE/tags" || true
+          echo ""
+
       - name: Run daily pipeline
         run: python -m src.main
 
