@@ -1,21 +1,54 @@
-"""Stitch a final 1080p MP4 from a looping background video and an audio track."""
+"""Stitch a final 720p MP4 from a looping background video and an audio track.
+
+720p (1280x720) is YouTube's "HD" tier. For gospel meditation videos that are
+mostly static atmospheric loops, 720p is visually indistinguishable from 1080p
+in the YouTube feed and encodes ~4x faster on small CI runners. 24 fps is
+enough for ambient loop content.
+"""
 from __future__ import annotations
 
 import json
 import logging
+import re
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 log = logging.getLogger(__name__)
 
 
-def _run(cmd: list[str]) -> None:
+_PROGRESS_RE = re.compile(r"out_time_us=(\d+)|frame=(\d+)|speed=([0-9.]+)x")
+
+
+def _run_with_progress(cmd: list[str], total_seconds: float) -> None:
+    """Run FFmpeg and emit progress every ~10s so the workflow log shows
+    forward motion (instead of going silent for minutes)."""
     log.info("$ %s", " ".join(cmd))
-    proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
-    if proc.returncode != 0:
-        log.error("ffmpeg stderr: %s", proc.stderr[-2000:])
-        raise RuntimeError(f"ffmpeg failed (exit {proc.returncode})")
+    proc = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    last_log = time.monotonic()
+    last_pct = -10
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        m = re.search(r"out_time_ms=(\d+)", line)
+        if not m:
+            continue
+        elapsed_s = int(m.group(1)) / 1_000_000.0
+        pct = min(100, int(elapsed_s / total_seconds * 100)) if total_seconds else 0
+        now = time.monotonic()
+        if pct >= last_pct + 10 or now - last_log >= 10:
+            log.info("FFmpeg progress: %d%% (%.1fs / %.1fs)", pct, elapsed_s, total_seconds)
+            last_log = now
+            last_pct = pct
+    rc = proc.wait()
+    if rc != 0:
+        raise RuntimeError(f"ffmpeg failed (exit {rc})")
 
 
 def _probe_duration(path: Path) -> float:
@@ -56,31 +89,37 @@ def stitch(
     cmd = [
         "ffmpeg",
         "-y",
+        "-hide_banner",
+        "-loglevel", "warning",
+        "-progress", "pipe:1",
         "-stream_loop", "-1",
         "-i", str(video_path),
         "-i", str(audio_path),
         "-filter_complex",
         (
-            "[0:v]scale=1920:1080:force_original_aspect_ratio=increase,"
-            "crop=1920:1080,setsar=1,fps=30[v];"
+            "[0:v]scale=1280:720:force_original_aspect_ratio=increase,"
+            "crop=1280:720,setsar=1,fps=24[v];"
             f"[1:a]afade=t=in:st=0:d={fade_in},"
             f"afade=t=out:st={fade_out_start:.2f}:d={fade_out}[a]"
         ),
         "-map", "[v]",
         "-map", "[a]",
         "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "20",
+        "-preset", "ultrafast",
+        "-crf", "23",
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
-        "-b:a", "192k",
+        "-b:a", "160k",
         "-ar", "44100",
         "-shortest",
         "-movflags", "+faststart",
         str(out_path),
     ]
-    _run(cmd)
+    _run_with_progress(cmd, audio_dur)
 
     final_dur = _probe_duration(out_path)
-    log.info("Stitched video duration: %.2fs → %s", final_dur, out_path)
+    final_size = out_path.stat().st_size / (1024 * 1024)
+    log.info(
+        "Stitched video: %.2fs, %.1f MB → %s", final_dur, final_size, out_path
+    )
     return out_path

@@ -128,9 +128,9 @@ def generate_metadata(
     }
     log.info("Requesting metadata from %s (model=%s)", url, cfg.ollama_model)
     try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=60)
+        resp = requests.post(url, json=payload, headers=headers, timeout=180)
     except requests.exceptions.Timeout as e:
-        log.warning("Ollama request timed out after 60s (will retry): %s", e)
+        log.warning("Ollama request timed out after 180s (will retry): %s", e)
         raise
     if 400 <= resp.status_code < 500:
         snippet = resp.text[:500].replace("\n", " ")
