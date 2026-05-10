@@ -86,6 +86,9 @@ def stitch(
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Note: -t (output duration cap) is mandatory because -shortest is
+    # unreliable when paired with -stream_loop -1 (infinite input). Without
+    # -t, FFmpeg can encode for hours without exiting.
     cmd = [
         "ffmpeg",
         "-y",
@@ -111,7 +114,7 @@ def stitch(
         "-c:a", "aac",
         "-b:a", "160k",
         "-ar", "44100",
-        "-shortest",
+        "-t", f"{audio_dur:.2f}",
         "-movflags", "+faststart",
         str(out_path),
     ]
