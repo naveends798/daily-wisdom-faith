@@ -109,6 +109,15 @@ def find_default_folder(cfg: Config) -> Optional[dict]:
     return _find_child(svc, cfg.drive_queue_folder_id, "default")
 
 
+def find_folder_in_published(cfg: Config, name: str) -> Optional[dict]:
+    """Find a subfolder by name under prayer-channel-queue/published/."""
+    svc = _service(cfg)
+    published = _find_child(svc, cfg.drive_queue_folder_id, "published")
+    if not published:
+        return None
+    return _find_child(svc, published["id"], name)
+
+
 def download_assets(
     cfg: Config, folder: dict, dest_dir: Path
 ) -> tuple[Path, Path, Path, Optional[str], str]:

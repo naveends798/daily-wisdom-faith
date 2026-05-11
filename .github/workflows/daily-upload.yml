@@ -6,6 +6,12 @@ on:
     - cron: '30 3 * * *'
   # Allow manual runs for testing from the Actions tab
   workflow_dispatch:
+    inputs:
+      source_folder_name:
+        description: 'Re-process an archived folder (e.g. 2026-05-10). Leave empty for normal daily flow.'
+        required: false
+        type: string
+        default: ''
 
 concurrency:
   group: daily-upload
@@ -34,6 +40,8 @@ jobs:
       OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.openai.com/v1' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
+
+      SOURCE_FOLDER_NAME: ${{ inputs.source_folder_name }}
 
       SMTP_USER: ${{ vars.SMTP_USER || 'naveends798@gmail.com' }}
       SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}

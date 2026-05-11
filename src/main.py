@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
 import traceback
 from collections import deque
@@ -53,16 +54,31 @@ def run() -> int:
     work = WORK_DIR / today.strftime("%Y-%m-%d")
     work.mkdir(parents=True, exist_ok=True)
 
-    folder = drive.find_today_folder(cfg, today=today)
+    # One-off override: SOURCE_FOLDER_NAME lets workflow_dispatch re-process a
+    # folder under published/ without touching the normal daily flow. When set
+    # we skip archival (the source is already archived).
+    source_override = os.environ.get("SOURCE_FOLDER_NAME", "").strip()
     using_fallback = False
-    if not folder:
-        log.warning("Today's folder %s missing; falling back to default/", today)
-        folder = drive.find_default_folder(cfg)
-        using_fallback = True
+    skip_archive = False
+
+    if source_override:
+        log.info("SOURCE_FOLDER_NAME override: %r", source_override)
+        folder = drive.find_folder_in_published(cfg, source_override)
         if not folder:
             raise RuntimeError(
-                "No today-folder and no default/ folder. Channel cannot publish."
+                f"SOURCE_FOLDER_NAME={source_override!r} not found under published/"
             )
+        skip_archive = True
+    else:
+        folder = drive.find_today_folder(cfg, today=today)
+        if not folder:
+            log.warning("Today's folder %s missing; falling back to default/", today)
+            folder = drive.find_default_folder(cfg)
+            using_fallback = True
+            if not folder:
+                raise RuntimeError(
+                    "No today-folder and no default/ folder. Channel cannot publish."
+                )
 
     try:
         audio_path, video_path, image_path, notes, audio_stem = drive.download_assets(
@@ -101,11 +117,12 @@ def run() -> int:
         meta_path = work / "metadata.json"
         meta_path.write_text(json.dumps(meta.to_dict(), indent=2), encoding="utf-8")
 
-        if not using_fallback:
+        if not using_fallback and not skip_archive:
             drive.archive_folder(
                 cfg, folder, artifacts=[final_path, thumb_path, meta_path]
             )
-        drive.maintain_window(cfg, today=today)
+        if not skip_archive:
+            drive.maintain_window(cfg, today=today)
 
         notifier.notify_success(
             cfg,
