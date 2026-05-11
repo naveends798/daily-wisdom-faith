@@ -68,17 +68,48 @@ def _probe_duration(path: Path) -> float:
     return float(json.loads(proc.stdout)["format"]["duration"])
 
 
+def _concat_audio(audio_paths: list[Path], dest: Path) -> Path:
+    """Concatenate multiple audio files into one using ffmpeg concat demuxer."""
+    if len(audio_paths) == 1:
+        return audio_paths[0]
+    list_file = dest.parent / "audio_list.txt"
+    list_file.write_text(
+        "\n".join(f"file '{p.resolve()}'" for p in audio_paths),
+        encoding="utf-8",
+    )
+    cmd = [
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "warning",
+        "-f", "concat", "-safe", "0", "-i", str(list_file),
+        "-c", "copy", str(dest),
+    ]
+    log.info("Concatenating %d audio files → %s", len(audio_paths), dest.name)
+    subprocess.run(cmd, check=True)
+    list_file.unlink(missing_ok=True)
+    return dest
+
+
 def stitch(
-    audio_path: Path,
+    audio_paths: "Path | list[Path]",
     video_path: Path,
     out_path: Path,
     *,
     fade_in: float = 2.0,
     fade_out: float = 3.0,
 ) -> Path:
-    """Loop the background video to match audio duration, fade audio, encode."""
+    """Loop the background video to match audio duration, fade audio, encode.
+
+    audio_paths can be a single Path or a list of Paths — multiple files are
+    concatenated in sorted order before stitching (for long-form videos).
+    """
     if not shutil.which("ffmpeg"):
         raise RuntimeError("ffmpeg is not installed or not on PATH")
+
+    if isinstance(audio_paths, Path):
+        audio_paths = [audio_paths]
+
+    audio_paths = sorted(audio_paths)
+    combined_audio = out_path.parent / "_combined_audio.mp3"
+    audio_path = _concat_audio(audio_paths, combined_audio)
 
     audio_dur = _probe_duration(audio_path)
     fade_out_start = max(0.0, audio_dur - fade_out)
@@ -119,6 +150,10 @@ def stitch(
         str(out_path),
     ]
     _run_with_progress(cmd, audio_dur)
+
+    # Remove temp concat file if we created one
+    if combined_audio.exists() and combined_audio != audio_paths[0]:
+        combined_audio.unlink(missing_ok=True)
 
     final_dur = _probe_duration(out_path)
     final_size = out_path.stat().st_size / (1024 * 1024)
