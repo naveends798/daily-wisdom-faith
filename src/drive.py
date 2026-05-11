@@ -135,16 +135,18 @@ def download_assets(
     audio_exts = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"}
     video_exts = {".mp4", ".mov", ".webm", ".mkv"}
     image_exts = {".jpg", ".jpeg", ".png"}
+    # Skip generated artifacts that may exist when re-processing an archived
+    # folder via SOURCE_FOLDER_NAME (final.mp4 is our stitched output;
+    # metadata.json is the saved sidecar).
+    ARTIFACT_NAMES = {"final.mp4", "metadata.json"}
 
-    audio = next(
-        (c for c in children if Path(c["name"]).suffix.lower() in audio_exts), None
-    )
-    video = next(
-        (c for c in children if Path(c["name"]).suffix.lower() in video_exts), None
-    )
-    image = next(
-        (c for c in children if Path(c["name"]).suffix.lower() in image_exts), None
-    )
+    def _is_source(c: dict, exts: set[str]) -> bool:
+        name = c["name"]
+        return name not in ARTIFACT_NAMES and Path(name).suffix.lower() in exts
+
+    audio = next((c for c in children if _is_source(c, audio_exts)), None)
+    video = next((c for c in children if _is_source(c, video_exts)), None)
+    image = next((c for c in children if _is_source(c, image_exts)), None)
     notes = next((c for c in children if c["name"].lower() == "notes.txt"), None)
 
     if not audio:
