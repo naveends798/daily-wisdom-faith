@@ -204,6 +204,41 @@ def archive_folder(cfg: Config, folder: dict, *, artifacts: list[Path]) -> None:
     log.info("Archived folder %s under published/", folder["name"])
 
 
+def upload_ready_video(
+    cfg: Config,
+    *,
+    folder_name: str,
+    final_path: Path,
+    thumb_path: Path,
+    meta_path: Path,
+) -> str:
+    """Upload the stitched video + thumbnail + metadata to ready-to-upload/<folder_name>.
+
+    Returns a Drive folder URL the user can open to upload manually.
+    """
+    svc = _service(cfg)
+    ready_folder = _find_child(svc, cfg.drive_queue_folder_id, "ready-to-upload")
+    if not ready_folder:
+        ready_folder = _create_folder(svc, cfg.drive_queue_folder_id, "ready-to-upload")
+
+    day_folder = _find_child(svc, ready_folder["id"], folder_name)
+    if not day_folder:
+        day_folder = _create_folder(svc, ready_folder["id"], folder_name)
+
+    for path in (final_path, thumb_path, meta_path):
+        if not path.exists():
+            continue
+        media = MediaFileUpload(str(path), resumable=True)
+        svc.files().create(
+            body={"name": path.name, "parents": [day_folder["id"]]},
+            media_body=media,
+            fields="id",
+        ).execute()
+        log.info("Uploaded to ready-to-upload/%s: %s", folder_name, path.name)
+
+    return f"https://drive.google.com/drive/folders/{day_folder['id']}"
+
+
 def find_or_create_root(cfg_partial, name: str = "prayer-channel-queue") -> str:
     """First-run helper: look up or create the queue root folder by name in My Drive.
 

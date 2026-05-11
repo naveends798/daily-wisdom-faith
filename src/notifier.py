@@ -28,15 +28,16 @@ def _send(cfg: Config, *, subject: str, body: str) -> None:
     log.info("Email sent to %s: %s", cfg.notify_email, subject)
 
 
-def notify_success(cfg: Config, *, video_id: str, title: str, scheduled_for: str) -> None:
+def notify_success(cfg: Config, *, drive_link: str, title: str, scheduled_for: str) -> None:
     body = (
-        f"Daily Wisdom Faith — upload succeeded.\n\n"
+        f"Daily Wisdom Faith — video ready for upload.\n\n"
         f"Title: {title}\n"
-        f"Video ID: {video_id}\n"
-        f"Scheduled to publish: {scheduled_for} (IST)\n"
-        f"Watch (after publish): https://youtu.be/{video_id}\n"
+        f"Date: {scheduled_for}\n\n"
+        f"Your video is ready in Google Drive. Open the link below,\n"
+        f"download final.mp4, and upload it manually to YouTube:\n\n"
+        f"{drive_link}\n"
     )
-    _send(cfg, subject=f"✅ Daily Wisdom — uploaded: {title[:60]}", body=body)
+    _send(cfg, subject=f"✅ Daily Wisdom — video ready: {title[:60]}", body=body)
 
 
 def notify_failure(cfg: Config, *, error: str, log_tail: str) -> None:

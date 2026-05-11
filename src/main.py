@@ -6,10 +6,10 @@ Pipeline:
   3. Generate title/description/tags via OpenAI (gpt-4o-mini)
   4. Resize/compress the user thumbnail to YouTube's 1280x720 / 2 MB spec
   5. Stitch final 1080p MP4 with looping video and faded audio
-  6. Upload to YouTube, scheduled at today 09:00 IST
+  6. Upload finished video + thumbnail + metadata to Drive ready-to-upload/<date>/
   7. Archive the Drive folder under published/ (with artifacts)
   8. Maintain rolling 30-day folder window
-  9. Email success or failure
+  9. Email with Drive link for manual YouTube upload
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from collections import deque
 from datetime import date
 
 from .config import WORK_DIR, Config
-from . import drive, notifier, openai_client, thumbnail, video, youtube
+from . import drive, notifier, openai_client, thumbnail, video
 
 LOG_TAIL = deque(maxlen=80)
 
@@ -103,19 +103,17 @@ def run() -> int:
         final_path = work / "final.mp4"
         video.stitch(audio_path, video_path, final_path)
 
-        video_id = youtube.upload_video(
-            cfg,
-            video_path=final_path,
-            thumbnail_path=thumb_path,
-            title=meta.title,
-            description=meta.description,
-            tags=meta.tags,
-            category_id=meta.category_id,
-            schedule=True,
-        )
-
         meta_path = work / "metadata.json"
         meta_path.write_text(json.dumps(meta.to_dict(), indent=2), encoding="utf-8")
+
+        folder_name = today.strftime("%Y-%m-%d")
+        drive_link = drive.upload_ready_video(
+            cfg,
+            folder_name=folder_name,
+            final_path=final_path,
+            thumb_path=thumb_path,
+            meta_path=meta_path,
+        )
 
         if not using_fallback and not skip_archive:
             drive.archive_folder(
@@ -126,9 +124,9 @@ def run() -> int:
 
         notifier.notify_success(
             cfg,
-            video_id=video_id,
+            drive_link=drive_link,
             title=meta.title,
-            scheduled_for=f"{today.strftime('%Y-%m-%d')} {cfg.publish_hour_local:02d}:00",
+            scheduled_for=today.strftime("%Y-%m-%d"),
         )
         log.info("Pipeline complete. videoId=%s", video_id)
         return 0

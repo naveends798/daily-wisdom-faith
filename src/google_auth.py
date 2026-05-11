@@ -6,8 +6,6 @@ from google.oauth2.credentials import Credentials
 from .config import Config
 
 SCOPES = [
-    "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/drive",
 ]
 
